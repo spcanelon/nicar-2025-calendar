@@ -1,0 +1,34 @@
+.cell-info-button {
+  padding: 0;
+}
+
+.cell-info-button > button {
+  height: 100%;
+  width: 100%;
+}
+
+.rt-select {
+  height: 100%;
+}
+
+.screenreader-text {
+  position: absolute;
+  left: -999px;
+  width:1px;
+  height: 1px;
+  top: auto;
+}
+
+.screenreader-text:focus {
+  color: currentColor;
+  display: inline-block;
+  height: auto;
+  width: auto;
+  position: static;
+  margin: auto;
+}
+
+/* style links */
+a{text-decoration: underline;}
+a:hover{text-decoration:none;}
+.btn,.btn-success a{text-decoration: none; !important}
