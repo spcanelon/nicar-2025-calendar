@@ -6,15 +6,15 @@ library(calendar)
 library(reactable)
 library(glue)
 # source
-source("R/data_cleaning.R")
 source("R/stack.R")
 source("R/cards.R")
 
+# setup ----
 Sys.setenv(TZ = "US/Central")
 
 # define Bootstrap theme
 theme <- bs_theme(
-  version = 4, #TODO update to 5
+  version = 5,
   bootswatch = "lux",
   primary = "#4f3d63",
   secondary = "#6aae8a",
@@ -28,15 +28,18 @@ theme <- bs_theme(
 )
 
 # import and wrangle schedule data
-schedule <- readr::read_csv("data/schedule.csv") |> dplyr::arrange(start_datetime)
+schedule <- readr::read_rds("data/schedule.rds") |> dplyr::arrange(start_datetime)
 # create unique event ID
 schedule$id <- seq_len(nrow(schedule))
 # create line break between speakers
-schedule$speakers <- gsub(schedule$speakers, pattern = ", ", replacement = "<br>")
+schedule$speakers_html <- gsub(schedule$speakers, pattern = ", ", replacement = "<br>")
 
+# add directory of static resources to Shiny's web server
+addResourcePath(prefix = "img", directoryPath = "img")
 
+# define your Shiny UI (sometimes ui.R) ----
 ui <- navbarPage(
-  'NICAR 2025 Calendar',
+  'NICAR 2025 calendar',
   theme = theme,
   collapsible = TRUE,
   tabPanel(
@@ -60,28 +63,29 @@ ui <- navbarPage(
           uiOutput("your_talks"),
           div(
             class = "row",
+            # input fields
             div(
               class = "col-6 col-lg-12",
               textInput("sch_search", "Search", width = "100%"),
               radioButtons("sch_day", "Day",
                            c("Thursday" = "one", "Friday" = "two", "Saturday" = "three", "Sunday" = "four", "All" = "all"),
                            inline = TRUE, selected = c("all"), width = "100%"),
-              sliderInput("sch_hours", "Hours", value = c(7, 17),
+              sliderInput("sch_hours", "Hours", value = c(6, 18),
                           min = 0, max = 24, step = 1, post = ":00", width = "100%")
             ),
             div(
               class = "col-6 col-lg-12",
-              selectizeInput(
-                "sch_presenter", "Speakers",
-                choices = sort(unique(schedule$speakers)),
-                multiple = TRUE, width = "100%"),
+              selectizeInput("sch_presenter", "Speakers",
+                             # choices = sort(unique(schedule$speakers)),
+                             choices = sort(unique(schedule$speaker_names)),
+                             multiple = TRUE, width = "100%"),
               selectizeInput("sch_type", "Session Type",
                              choices = sort(unique(schedule$session_type)),
                              multiple = TRUE, width = "100%"),
               selectizeInput("sch_topic", "Skill Level",
                              choices = sort(unique(schedule$skill_level)),
                              multiple = TRUE, width = "100%")
-            )
+            ),
           )
         ),
         div(
@@ -116,13 +120,35 @@ ui <- navbarPage(
       h2(class = "text-monospace",
          HTML("Hi there!")
       ),
-      p(HTML("My name is Silvia Canelón, and this is my first time attending NICAR!<br>If you see me around, please say hello. &#xFE0F;👋")
+      div(
+      # class = "image-cropper",
+        style = "margin-top: 20px;",
+        img(src = "https://silviacanelon.com/about/sidebar/avatar.png",
+            alt = "Smiling woman with a tan complexion, dark eyes, and dark long wavy hair styled to one side",
+            class = "image-cropper rounded"
         ),
-      p("You can also get in touch on",
-        tags$a(href = "https://bsky.app/profile/silviacanelon.com", "Bluesky", .noWS = "after"),
-        " or through",
-        tags$a(href = "https://silviacanelon.com/contact", "my website.", .noWS = "after")
+        p("My name is",
+          tags$a(href = "https://silviacanelon.com", "Silvia Canelón", .noWS = "after"),
+          HTML(" and this is my first time attending NICAR. &#xFE0F;👋")
         ),
+        p("If you see me around, please say hello!"
+          ),
+        p("You can also get in touch on",
+          tags$a(href = "https://bsky.app/profile/silviacanelon.com", "Bluesky", .noWS = "after"),
+          " or through",
+          tags$a(href = "https://silviacanelon.com/contact", "my website.", .noWS = "after")
+        ),
+      ),
+      p(
+        HTML("<br>This app was built with &#x2665;"),
+        " using the official NICAR 2025 schedule, Shiny, and the R packages below.",
+        HTML("You can find"),
+        tags$a(href = "https://github.com/spcanelon/nicar-2025-calendar", "the full source code for this app"),
+        "on GitHub (adapted from an app created by",
+        tags$a(href = "https://github.com/gadenbuie/rstudio-global-2021-calendar", "Garrick Aden-Buie"),
+        ")."
+      ),
+      tags$hr(class = "my-4"),
       h2(
         class = "text-monospace",
         "NICAR 2025"
@@ -153,29 +179,14 @@ ui <- navbarPage(
         )
       ),
       tags$hr(class = "my-4"),
-      h2("About this app", class = "text-monospace"),
-      p(
-        HTML("This app was built with &#x2665; by"),
-        tags$a(href = "https://silviacanelon.com", "Silvia Canelón", .noWS = "after"),
-        " using the packages below, and adapted from an app created by",
-        tags$a(href = "https://github.com/gadenbuie/rstudio-global-2021-calendar", "Garrick Aden-Buie."),
-        HTML("You can find"),
-        tags$a(href = "https://github.com/spcanelon/nicar-2025-calendar", "the full source code"),
-        "on GitHub."
-      ),
+      h2("Packages", class = "text-monospace"),
       div(
-        class = "d-flex flex-wrap align-items-stretch justify-content-between",
+        class = "row row-cols-2 row-cols-lg-3 g-2 g-lg-3",
         card(
           "shiny",
           posit_hex("shiny"),
           "https://shiny.rstudio.com",
           "Shiny is an R package that makes it easy to build interactive web apps straight from R."
-        ),
-        card(
-          "renv",
-          posit_hex("renv"),
-          "https://rstudio.github.io/renv",
-          "The renv package helps you create reproducible environments for your R projects. Use renv to make your R projects more: isolated, portable, and reproducible."
         ),
         card(
           "bslib",
@@ -184,16 +195,10 @@ ui <- navbarPage(
           "Tools for creating custom Bootstrap themes, making it easier to style Shiny apps & R Markdown documents directly from R without writing unruly CSS and HTML."
         ),
         card(
-          "R6",
-          posit_hex("R6"),
-          "https://r6.r-lib.org/",
-          "Encapsulated object-oriented programming for R."
-        ),
-        card(
-          "glue",
-          posit_hex("glue"),
-          "https://glue.tidyverse.org",
-          "Glue strings to data in R. Small, fast, dependency free interpreted string literals."
+          "rvest",
+          posit_hex("rvest"),
+          "https://rstudio.github.io/rvest",
+          "The rvest package helps you scrape (or harvest) data from web pages."
         ),
         card(
           "lubridate",
@@ -202,33 +207,45 @@ ui <- navbarPage(
           "Make working with dates in R just that little bit easier."
         ),
         card(
+          "glue",
+          posit_hex("glue"),
+          "https://glue.tidyverse.org",
+          "Glue strings to data in R. Small, fast, dependency free interpreted string literals."
+        ),
+        card(
+          "R6",
+          posit_hex("R6"),
+          "https://r6.r-lib.org/",
+          "Encapsulated object-oriented programming for R."
+        ),
+        card(
+          "renv",
+          posit_hex("renv"),
+          "https://rstudio.github.io/renv",
+          "The renv package helps you create reproducible environments for your R projects. Use renv to make your R projects more: isolated, portable, and reproducible."
+        ),
+        card(
           "calendar",
-          NULL,
+          placeholder_hex("calendar"),
           "https://github.com/ATFutures/calendar",
           "Create, read, write, and work with iCalendar (.ics, .ical or similar) files in R."
         ),
         card(
           "reactable",
-          NULL,
+          placeholder_hex("calendar"),
           "https://glin.github.io/reactable/index.html",
           "Interactive data tables for R, based on the React Table library and made with reactR."
-        ),
-        card(
-          "prettyunits",
-          NULL,
-          "https://github.com/r-lib/prettyunits",
-          "Pretty, human readable formatting of quantities."
         ),
       )
     )
   )
 )
 
-
+# define Shiny server logic (sometimes server.R) ----
 server <- function(input, output, session) {
   selected_talks <- Stack$new()
   selected_in_current_view <- reactiveVal()
-
+  
   # select conference day
   schedule_view <- reactive({
     if (isTruthy(input$sch_day)) {
@@ -242,7 +259,9 @@ server <- function(input, output, session) {
         schedule <- schedule[schedule$day == "Sunday"]
       }
     }
+    
     schedule$time <- with_tz(schedule$start_datetime, tzone = "US/Central")
+    
     # select hours
     if (isTruthy(input$sch_hours)) {
       schedule <- schedule[
@@ -267,7 +286,9 @@ server <- function(input, output, session) {
     if (isTruthy(input$sch_topic)) {
       schedule <- schedule[schedule$skill_level %in% input$sch_topic, ]
     }
+    
     schedule$info <- schedule$session_id
+    
     common_vars <- c(
       "id", "info", "session_id", "session_type", "session_title",
       "start_datetime", "duration_formatted", "skill_level", "location", "url"
@@ -358,7 +379,7 @@ server <- function(input, output, session) {
   })
 
   ignore_schedule_change <- reactiveVal(FALSE)
-
+  
   output$schedule <- reactable::renderReactable({
     ignore_schedule_change(TRUE)
     reactable(
@@ -394,7 +415,7 @@ server <- function(input, output, session) {
           cell = function(value) {
             value <- paste(value)
             glue(
-              '<span class="badge badge-pill badge-{type}">{value}</span>',
+              '<span class="badge rounded-pill bg-{type}">{value}</span>',
               type = switch(
                 value,
                 Networking = "info",
@@ -423,7 +444,7 @@ server <- function(input, output, session) {
           cell = function(value) {
             if (!is.na(value)) {
               glue(
-                '<span class="badge badge-pill badge-{type}">{value}</span>',
+                '<span class="badge rounded-pill bg-{type}">{value}</span>',
                 type = switch(
                   paste(value),
                   Beginner = "info",
@@ -437,7 +458,7 @@ server <- function(input, output, session) {
         ),
         session_title = colDef(
           name = "Title",
-          minWidth = 150,
+          minWidth = 175,
           html = TRUE,
           cell = JS("
             function(cellInfo) {
@@ -511,7 +532,8 @@ server <- function(input, output, session) {
         h2("Description"),
         HTML(talk$session_description[[1]]),
         h2("Speakers"),
-        HTML(talk$speakers[[1]]),
+        # HTML(talk$speakers[[1]]),
+        HTML(talk$speakers_html[[1]]),
         footer = list(
           tags$a(
             href = talk$url[[1]],
@@ -527,4 +549,5 @@ server <- function(input, output, session) {
 
 }
 
+# create and launch the Shiny app ----
 shinyApp(ui = ui, server = server)

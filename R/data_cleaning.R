@@ -1,6 +1,7 @@
 library(dplyr)
 library(stringr)
 library(tidyr)
+library(lubridate)
 library(jsonlite)
 library(rvest)
 
@@ -11,6 +12,14 @@ schedule_json <- stream_in(file("data/nicar-2025-schedule.json"))
 room_flat <- flatten(schedule_json$room)
 schedule <- schedule_json |> select(-c(room, recorded)) |> cbind(room_flat)
 
+# function to clean lists
+clean_list <- function(x) {
+  
+  x <- as.character(x)
+  x <- str_remove_all(x, pattern = "\"")
+  x <<- str_remove_all(x, pattern = "^c\\(|\\)$")
+}
+
 # extracting nested speaker info
 speakers_info <-
   schedule  |>
@@ -20,19 +29,24 @@ speakers_info <-
   mutate(first = str_replace(first, pattern = "Elizabeth Santos, UC Berkeley",
                              replacement = "Elizabeth")) |>
   group_by(session_id) |>
-  mutate(full_name = str_c(first, last, sep = " "),
-         speaker = glue::glue("{full_name} - {affiliation}")) |>
-  summarize(speaker_list = list(speaker)) |>
-  mutate(speaker_list = as.character(speaker_list),
-         speaker_list_tidy = str_remove_all(speaker_list, pattern = "\""),
-         speaker_list_tidy = str_remove_all(speaker_list_tidy, pattern = "^c\\(|\\)$")) |>
-  select(-speaker_list) |>
-  rename(speakers = speaker_list_tidy) |>
+  mutate(speaker_name = str_c(first, last, sep = " "),
+         speaker = glue::glue("{speaker_name} - {affiliation}")) |>
+  reframe(speaker_name,
+          affiliation,
+          speaker,
+          speaker_name_list = list(speaker_name),
+          speaker_list = list(speaker)) |>
+  mutate(speaker_name_list_tidy = clean_list(speaker_name_list),
+         speaker_list_tidy = clean_list(speaker_list)) |> 
+  rename(speaker_names = speaker_name_list_tidy,
+         speakers = speaker_list_tidy) |>
+  select(c(session_id, speaker_name, affiliation, speaker, speaker_names, speakers)) |>
   unique()
 
 # create variable for session location
 schedule <-
-  left_join(schedule |> select(-speakers), speakers_info) |>
+  left_join(schedule |> select(-speakers), 
+            speakers_info |> select(-c(speaker_name:speaker)) |> unique()) |>
   mutate(location = glue::glue("{room_name}, {level} floor")) |>
   mutate(recorded = if_else(recorded == TRUE, "Yes", "No")) |>
   select(-c(room_name, level))
@@ -48,17 +62,35 @@ links <- links |>
 # join URLs back to schedule
 schedule <- schedule |> mutate(session_id = as.character(session_id)) |> left_join(links)
 
-# change NA to "Not available/NA/-999/"
+# dealing with NAs and empty cells
 schedule <- schedule |>
-  mutate(across(.cols = description,
-                .fns = ~replace(., .=="", "Not available/NA/-999/404")))
+  mutate(description = replace(description, description == "", "Not available/NA/-999/404"),
+         skill_level = replace(skill_level, skill_level == "", NA))
+
+# wrangling factors
+type_list <- c("Networking", "Panel", "Demo", "Hands-on", "Commons", "Special", "Pre-registration - Hands-on")
+skill_list <- c("Beginner", "Intermediate", "Advanced")
+
+schedule <- schedule |> 
+  mutate(session_type = factor(
+    session_type,
+    levels = type_list, 
+    labels = type_list)) |> 
+  mutate(skill_level = factor(
+    skill_level,
+    levels = skill_list,
+    labels = skill_list
+  ))
 
 # export schedule
 schedule <- schedule |>
-  rename(session_description = description,
-         start_datetime = start_time,
-         end_datetime = end_time) |>
+  rename(session_description = description) |>
   # add dummy variable for speaker bio
-  mutate(bio_html = "") |>
-  select(-c(canceled, evergreen, sponsor, audio_recording_link, tipsheets, os))
-readr::write_csv(schedule, file = "data/schedule.csv")
+  mutate(start_datetime = as_datetime(start_time),
+         end_datetime = as_datetime(end_time),
+         bio_html = "") |>
+  select(-c(canceled, evergreen, sponsor, audio_recording_link, tipsheets, os, start_time, end_time)) |> 
+  unique()
+
+readr::write_rds(schedule, file = "data/schedule.rds")
+readr::write_rds(speakers_info, file = "data/speakers_info.rds")
