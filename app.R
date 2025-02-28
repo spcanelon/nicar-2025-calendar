@@ -6,6 +6,7 @@ library(calendar)
 library(reactable)
 library(glue)
 # source
+source("R/data_cleaning.R")
 source("R/stack.R")
 source("R/cards.R")
 
