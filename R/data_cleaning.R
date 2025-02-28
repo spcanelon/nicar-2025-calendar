@@ -6,7 +6,7 @@ library(jsonlite)
 library(rvest)
 
 # import JSON
-schedule_json <- stream_in(file("data/nicar-2025-schedule.json"))
+schedule_json <- fromJSON("https://schedules.ire.org/nicar-2025/nicar-2025-schedule.json")
 
 # wrangle
 room_flat <- flatten(schedule_json$room)
