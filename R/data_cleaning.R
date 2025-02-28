@@ -44,10 +44,11 @@ speakers_info <-
   unique()
 
 # create variable for session location
-schedule <-
-  left_join(schedule |> select(-speakers), 
-            speakers_info |> select(-c(speaker_name:speaker)) |> unique()) |>
-  mutate(location = glue::glue("{room_name}, {level} floor")) |>
+schedule <- 
+  schedule |> 
+  select(-speakers) |> 
+  left_join(speakers_info |> select(-c(speaker_name:speaker)) |> unique()) |>
+  mutate(location = str_replace(room_name, pattern = " fl", replacement = " floor")) |> 
   mutate(recorded = if_else(recorded == TRUE, "Yes", "No")) |>
   select(-c(room_name, level))
 

@@ -68,7 +68,8 @@ ui <- navbarPage(
               class = "col-6 col-lg-12",
               textInput("sch_search", "Search", width = "100%"),
               radioButtons("sch_day", "Day",
-                           c("Thursday" = "one", "Friday" = "two", "Saturday" = "three", "Sunday" = "four", "All" = "all"),
+                           c("Thursday" = "one", "Friday" = "two", 
+                             "Saturday" = "three", "Sunday" = "four", "All" = "all"),
                            inline = TRUE, selected = c("all"), width = "100%"),
               sliderInput("sch_hours", "Hours", value = c(6, 18),
                           min = 0, max = 24, step = 1, post = ":00", width = "100%")
@@ -76,7 +77,6 @@ ui <- navbarPage(
             div(
               class = "col-6 col-lg-12",
               selectizeInput("sch_presenter", "Speakers",
-                             # choices = sort(unique(schedule$speakers)),
                              choices = sort(unique(schedule$speaker_names)),
                              multiple = TRUE, width = "100%"),
               selectizeInput("sch_type", "Session Type",
@@ -84,8 +84,11 @@ ui <- navbarPage(
                              multiple = TRUE, width = "100%"),
               selectizeInput("sch_topic", "Skill Level",
                              choices = sort(unique(schedule$skill_level)),
-                             multiple = TRUE, width = "100%")
-            ),
+                             multiple = TRUE, width = "100%"),
+              radioButtons("sch_recorded", "Recorded session",
+                           c("Yes" = "yes", "No" = "no", "All" = "all"),
+                           inline = TRUE, selected = c("all"), width = "100%")
+            )
           )
         ),
         div(
@@ -276,7 +279,7 @@ server <- function(input, output, session) {
     }
     # select/search Presenter
     if (isTruthy(input$sch_presenter)) {
-      schedule <- schedule[schedule$speakers %in% input$sch_presenter, ]
+      schedule <- schedule[schedule$speaker_names %in% input$sch_presenter, ]
     }
     # select/search Talk Type
     if (isTruthy(input$sch_type)) {
@@ -286,12 +289,21 @@ server <- function(input, output, session) {
     if (isTruthy(input$sch_topic)) {
       schedule <- schedule[schedule$skill_level %in% input$sch_topic, ]
     }
+    # select whether the sessions are recorded
+    if (isTruthy(input$sch_recorded)) {
+      if (input$sch_recorded == "yes") {
+        schedule <- schedule[schedule$recorded == "Yes",]
+      } else if (input$sch_recorded == "no") {
+        schedule <- schedule[schedule$recorded == "No",]
+      }
+    }
     
     schedule$info <- schedule$session_id
     
     common_vars <- c(
       "id", "info", "session_id", "session_type", "session_title",
-      "start_datetime", "duration_formatted", "skill_level", "location", "url"
+      "start_datetime", "duration_formatted", "skill_level", "location", "url",
+      "recorded"
     )
     schedule <- schedule[, common_vars]
     schedule
@@ -380,6 +392,13 @@ server <- function(input, output, session) {
 
   ignore_schedule_change <- reactiveVal(FALSE)
   
+  icon_yes <- '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-camera-video-fill" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2z"/>
+</svg>'
+  icon_no <- '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-camera-video-off" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M10.961 12.365a2 2 0 0 0 .522-1.103l3.11 1.382A1 1 0 0 0 16 11.731V4.269a1 1 0 0 0-1.406-.913l-3.111 1.382A2 2 0 0 0 9.5 3H4.272l.714 1H9.5a1 1 0 0 1 1 1v6a1 1 0 0 1-.144.518zM1.428 4.18A1 1 0 0 0 1 5v6a1 1 0 0 0 1 1h5.014l.714 1H2a2 2 0 0 1-2-2V5c0-.675.334-1.272.847-1.634zM15 11.73l-3.5-1.555v-4.35L15 4.269zm-4.407 3.56-10-14 .814-.58 10 14z"/>
+</svg>'
+  
   output$schedule <- reactable::renderReactable({
     ignore_schedule_change(TRUE)
     reactable(
@@ -394,7 +413,7 @@ server <- function(input, output, session) {
         url = colDef(show = FALSE),
         start_datetime = colDef(
           name = "Time",
-          minWidth = 100,
+          minWidth = 150,
           html = TRUE,
           cell = function(value) {
             strftime(
@@ -406,10 +425,10 @@ server <- function(input, output, session) {
         ),
         duration_formatted = colDef(
           name = "Length",
-          minWidth = 75,
         ),
         session_type = colDef(
           name = "Type",
+          minWidth = 110,
           html = TRUE,
           align = "left",
           cell = function(value) {
@@ -430,16 +449,25 @@ server <- function(input, output, session) {
             )
           }
         ),
+        recorded = colDef(
+          name = "Recorded",
+          html = TRUE,
+          minWidth = 100,
+          align = "center",
+          cell = function(value) {
+            if (value == "Yes") icon_yes else icon_no
+          }
+        ),
         location = colDef(
           name = "Location",
           html = TRUE,
-          minWidth = 120,
+          minWidth = 150,
           align = "right"
         ),
         skill_level = colDef(
           name = "Skill Level",
           html = TRUE,
-          minWidth = 120,
+          minWidth = 110,
           align = "center",
           cell = function(value) {
             if (!is.na(value)) {
@@ -458,7 +486,7 @@ server <- function(input, output, session) {
         ),
         session_title = colDef(
           name = "Title",
-          minWidth = 175,
+          minWidth = 250,
           html = TRUE,
           cell = JS("
             function(cellInfo) {
