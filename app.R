@@ -257,9 +257,10 @@ server <- function(input, output, session) {
       } else if (input$sch_day == "two") {
         schedule <- schedule[schedule$day == "Friday",]
       } else if (input$sch_day == "three") {
-        schedule <- schedule[schedule$day == "Saturday"]
+        schedule <- schedule[schedule$day == "Saturday",]
       } else if (input$sch_day == "four") {
-        schedule <- schedule[schedule$day == "Sunday"]
+      # } else {
+        schedule <- schedule[schedule$day == "Sunday",]
       }
     }
     
