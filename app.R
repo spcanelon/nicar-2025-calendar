@@ -86,7 +86,7 @@ ui <- navbarPage(
               selectizeInput("sch_topic", "Skill Level",
                              choices = sort(unique(schedule$skill_level)),
                              multiple = TRUE, width = "100%"),
-              radioButtons("sch_recorded", "Recorded session",
+              radioButtons("sch_recorded", "Recorded Session",
                            c("Yes" = "yes", "No" = "no", "All" = "all"),
                            inline = TRUE, selected = c("all"), width = "100%")
             )
