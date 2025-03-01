@@ -132,7 +132,7 @@ ui <- navbarPage(
             class = "image-cropper rounded"
         ),
         p("My name is",
-          tags$a(href = "https://silviacanelon.com", "Silvia Canelón", .noWS = "after"),
+          tags$a(href = "https://silviacanelon.com/project/2025-02-28-nicar-calendar/", "Silvia Canelón", .noWS = "after"),
           HTML(" and this is my first time attending NICAR. &#xFE0F;👋")
         ),
         p("If you see me around, please say hello!"
