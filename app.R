@@ -67,7 +67,8 @@ ui <- navbarPage(
             # input fields
             div(
               class = "col-6 col-lg-12",
-              textInput("sch_search", "Search", width = "100%"),
+              textInput("sch_search", 
+                        label = "Search", width = "100%"),
               radioButtons("sch_day", "Day",
                            c("Thursday" = "one", "Friday" = "two", 
                              "Saturday" = "three", "Sunday" = "four", "All" = "all"),
@@ -267,16 +268,16 @@ server <- function(input, output, session) {
     
     schedule$time <- with_tz(schedule$start_datetime, tzone = "US/Central")
     
+    # use keyword Search
+    if (shiny::isTruthy(input$sch_search)) {
+      schedule <- schedule[
+        grepl(tolower(input$sch_search), tolower(paste(schedule$session_title, schedule$session_description, schedule$speakers))),
+      ]
+    }
     # select hours
     if (isTruthy(input$sch_hours)) {
       schedule <- schedule[
         hour(schedule$time) >= input$sch_hours[1] & hour(schedule$time) <= input$sch_hours[2],
-      ]
-    }
-    # use keyword Search
-    if (shiny::isTruthy(input$sch_search)) {
-      schedule <- schedule[
-        grepl(input$sch_search, tolower(paste(schedule$session_title, schedule$session_description, schedule$speakers))),
       ]
     }
     # select/search Presenter

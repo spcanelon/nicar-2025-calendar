@@ -5,7 +5,7 @@ account: spcanelon
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 14131021
-bundleId: 9873527
+bundleId: 9873642
 url: https://spcanelon.shinyapps.io/nicar-2025-calendar/
 version: 1
 asMultiple: FALSE
