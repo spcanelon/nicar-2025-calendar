@@ -40,7 +40,19 @@ addResourcePath(prefix = "img", directoryPath = "img")
 
 # define your Shiny UI (sometimes ui.R) ----
 ui <- navbarPage(
-  'NICAR 2025 calendar',
+  
+  # add metadata to app
+  header = metathis::meta_social(
+    title = "NICAR 2025 Calendar",
+    description = "An Shiny app that makes it easy to build and export your custom NICAR 2025 calendar.",
+    url = "http://spcanelon.shinyapps.io/nicar-2025-calendar",
+    image = "http://spcanelon.shinyapps.io/nicar-2025-calendar/social-card.png",
+    image_alt = "Shiny app table of NICAR 2025 sessions, displaying fields including session type, time, length, skill level, location, and whether they were recorded. The interactive options to filter the sessions include a keyword search bar, a radio button for the day of the conference, a slider for the time of day, a search bar for speakers, session type, and skill level, and lastly, a radio button for whether the session will be recorded. Official conference schedule is posted online at https://schedules.ire.org/nicar-2025/index.html",
+    twitter_creator = "@spcanelon",
+    twitter_card_type = "summary"
+  ),
+  
+  title = 'NICAR 2025 calendar',
   theme = theme,
   collapsible = TRUE,
   tabPanel(
