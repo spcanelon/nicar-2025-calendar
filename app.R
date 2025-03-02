@@ -363,7 +363,10 @@ server <- function(input, output, session) {
       talks$start_time <- with_tz(talks$start_datetime, tzone = "US/Central")
       talks$end_time <- with_tz(talks$end_datetime, tzone = "US/Central")
       talk_events <- lapply(seq_len(nrow(talks)), function(idx) {
-        desc <- paste0("Speakers: ", talks$speakers[[idx]], "\n\n", talks$session_description[[idx]])
+        desc <- paste0(
+          "Session link: ", talks$url[[idx]], "\n\n",
+          "Speakers: ", talks$speakers[[idx]], "\n\n", 
+          talks$session_description[[idx]])
         desc <- gsub("\n", "\\n", desc, fixed = TRUE)
         desc <- strwrap(desc, 75)
         desc <- paste(desc, collapse = " \n ")
