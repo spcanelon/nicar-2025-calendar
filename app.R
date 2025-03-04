@@ -569,6 +569,7 @@ server <- function(input, output, session) {
     )
   })
 
+  # pop-up window with more event info
   observeEvent(input$talk_more_info, {
     talk <- schedule[!is.na(schedule$session_id) & schedule$session_id == as.numeric(input$talk_more_info), ]
     req(nrow(talk))
@@ -580,8 +581,9 @@ server <- function(input, output, session) {
         title = talk$session_title[[1]],
         h2("Description"),
         HTML(talk$session_description[[1]]),
+        # line break
+        p(),
         h2("Speakers"),
-        # HTML(talk$speakers[[1]]),
         HTML(talk$speakers_html[[1]]),
         footer = list(
           tags$a(
