@@ -67,7 +67,7 @@ schedule <- schedule |> mutate(session_id = as.character(session_id)) |> left_jo
 
 # dealing with NAs and empty cells
 schedule <- schedule |>
-  mutate(description = replace(description, description == "", "Not available/NA/-999/404"),
+  mutate(description = replace(description, description == "", "Description coming soon."),
          skill_level = replace(skill_level, skill_level == "", NA))
 
 # wrangling factors
