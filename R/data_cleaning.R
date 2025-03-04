@@ -7,6 +7,8 @@ library(rvest)
 
 # import JSON
 schedule_json <- fromJSON("https://schedules.ire.org/nicar-2025/nicar-2025-schedule.json")
+# schedule_last_updated <- readr::read_rds("data/schedule.Rds")
+# schedule_json |> filter(!(session_id %in% schedule_last_updated$session_id))
 
 # wrangle
 room_flat <- flatten(schedule_json$room)
