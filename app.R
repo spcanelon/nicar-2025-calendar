@@ -283,7 +283,7 @@ server <- function(input, output, session) {
     # use keyword Search
     if (shiny::isTruthy(input$sch_search)) {
       schedule <- schedule[
-        grepl(tolower(input$sch_search), tolower(paste(schedule$session_title, schedule$session_description, schedule$speakers))),
+        grepl(tolower(input$sch_search), tolower(paste(schedule$session_id, schedule$session_title, schedule$session_description, schedule$speakers))),
       ]
     }
     # select hours
