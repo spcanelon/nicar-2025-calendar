@@ -377,6 +377,7 @@ server <- function(input, output, session) {
       talk_events <- lapply(seq_len(nrow(talks)), function(idx) {
         desc <- paste0(
           "Session link: ", talks$url[[idx]], "\n\n",
+          "Recorded (audio): ", talks$recorded[[idx]], "\n\n",
           "Speakers: ", talks$speakers[[idx]], "\n\n", 
           talks$session_description[[idx]])
         desc <- gsub("\n", "\\n", desc, fixed = TRUE)
