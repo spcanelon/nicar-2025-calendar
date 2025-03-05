@@ -1,4 +1,4 @@
-$(document).on('click', '.btn-talk-more-info, .btn-talk-more-info- i', function(ev) {
+$(document).on('click', '.btn-talk-more-info, .btn-talk-more-info- info', function(ev) {
   Shiny.setInputValue('talk_more_info', ev.target.closest('.btn').dataset.value, {priority: 'event'})
 })
 
