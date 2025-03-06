@@ -66,7 +66,7 @@ ui <- navbarPage(
       `tab-index` = 1,
       href = "https://schedules.ire.org/nicar-2025/"
     ),
-    p(paste("Last updated:", "Wed, Mar 05 @ 9:42 PM" 
+    p(paste("Last updated:", "Thu, Mar 06 @ 8:18 AM" 
             # format(lubridate::now(tzone = "US/Central"), "%a, %B %d @ %I:%M:%S %p")
             )),
     div(
@@ -380,6 +380,7 @@ server <- function(input, output, session) {
       talk_events <- lapply(seq_len(nrow(talks)), function(idx) {
         desc <- paste0(
           "Session link: ", talks$url[[idx]], "\n\n",
+          "Skill level: ", talks$skill_level[[idx]], "\n\n",
           "Recorded (audio): ", talks$recorded[[idx]], "\n\n",
           "Speakers: ", talks$speakers[[idx]], "\n\n", 
           talks$session_description[[idx]])
