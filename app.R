@@ -66,7 +66,7 @@ ui <- navbarPage(
       `tab-index` = 1,
       href = "https://schedules.ire.org/nicar-2025/"
     ),
-    p(paste("Last updated: ", format(lubridate::now(tzone = "US/Central"), "%a, %B %d @ %H:%M:%S %p"))),
+    p(paste("Last updated: ", format(lubridate::now(tzone = "US/Central"), "%a, %B %d @ %I:%M:%S %p"))),
     div(
       class = "container-fluid",
       style = "max-width: 1600px",
