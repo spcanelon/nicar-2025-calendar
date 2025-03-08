@@ -66,7 +66,7 @@ ui <- navbarPage(
       `tab-index` = 1,
       href = "https://schedules.ire.org/nicar-2025/"
     ),
-    p(paste("Last updated:", "Thu, Mar 06 @ 4:19 PM" 
+    p(paste("Last updated:", "Sat, Mar 08 @ 9:50 AM" 
             # format(lubridate::now(tzone = "US/Central"), "%a, %B %d @ %I:%M:%S %p")
             )),
     div(
