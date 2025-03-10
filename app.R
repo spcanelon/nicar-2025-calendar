@@ -66,7 +66,7 @@ ui <- navbarPage(
       `tab-index` = 1,
       href = "https://schedules.ire.org/nicar-2025/"
     ),
-    p(paste("Last updated:", "Sat, Mar 08 @ 9:50 AM" 
+    p(paste("Last updated:", "Mon, Mar 10 @ 12:44 PM" 
             # format(lubridate::now(tzone = "US/Central"), "%a, %B %d @ %I:%M:%S %p")
             )),
     div(
@@ -149,11 +149,9 @@ ui <- navbarPage(
         ),
         p("My name is",
           tags$a(href = "https://silviacanelon.com/project/2025-02-28-nicar-calendar/", "Silvia Canelón", .noWS = "after"),
-          HTML(" and this is my first time attending NICAR. &#xFE0F;👋")
+          HTML(" and this was my first time attending NICAR! &#xFE0F;👋")
         ),
-        p("If you see me around, please say hello!"
-          ),
-        p("You can also get in touch on",
+        p("Feel free to get in touch on",
           tags$a(href = "https://bsky.app/profile/silviacanelon.com", "Bluesky", .noWS = "after"),
           " or through",
           tags$a(href = "https://silviacanelon.com/contact", "my website.", .noWS = "after")
@@ -186,15 +184,15 @@ ui <- navbarPage(
       ),
       p(
         a(
-          "Register Now",
-          href = "https://www.ire.org/training/conferences/nicar-2025/nicar25-registration/",
+          "Tipsheets & Audio",
+          href = "https://www.ire.org/training/conferences/nicar-2025/nicar-2025-tipsheets-and-audio/",
           class = "btn btn-primary"
         ),
         a(
           tags$a(
+            "Official Schedule",
             href = "https://schedules.ire.org/nicar-2025/",
-            class = "btn btn-success",
-            "Official Schedule"
+            class = "btn btn-success"
           )
         )
       ),
